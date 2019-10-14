@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
-const rolling = require('./dices');
-const pjHero = require('./Character');
-const pjEnemy=require('./Enemies');
-const fight=require('./battle');
+const dices = require('./dices');
+const character = require('./character'); 
+const enemy = require('./enemy');
+const battle = require('./battle');
 let body = require('body-parser');
 
 
@@ -12,51 +12,51 @@ app.use(body.json());
 app.get('/', (req, res) => { res.send("Hola aventurero!!") });
 
 
-app.get('/GetClasses', (req, res) => {
-  res.send(pjHero.classes);
+app.get('/classes', (req, res) => {
+  res.send(hero.classes);
 });
 
-app.get('/GetEnemies', (req, res) => {
-  res.send(pjEnemy.EnemyList)
+app.get('/enemies', (req, res) => {
+  res.send(enemy.EnemyList)
 })
 
-app.get('/CreateHeroe/:class/:Name', (req, res) => {
-  let selectedClass = req.params.class;
-  let nameOfHero = req.params.Name;
-  let character =  pjHero.CreateHero(nameOfHero,selectedClass);
+app.post('/heroes', (req, res) => {
+  let selectedClass = req.body.class;
+  let nameOfHero = req.body.Name;
+  let character = hero.create(nameOfHero, selectedClass);
   res.send(character);
 
 });
 
-app.get('/CreateEnemy/:class/:name', (req, res) => {
-  let selectedEnemy = req.params.class;
-  let nameEnemy = req.params.name;
+app.post('/enemies', (req, res) => {
+  let selectedEnemy = req.body.class;
+  let enemyName = req.body.name;
 
-  let enemy =pjEnemy.CreateEnemies(nameEnemy,selectedEnemy);
-  res.send(enemy);
+  let newEnemy = enemy.create(enemyName, selectedEnemy);
+  res.send(newEnemy);
 })
 
-app.post('/combat/:enemy/', (req, res) => {
+app.post('/battles', (req, res) => {
   let hero = req.body;
-  let nameEnemy = req.params.enemy;
-  let enemy = pjEnemy.CreateEnemies(nameEnemy);
+  let enemyName = req.body.enemyName;
+  let enemy = enemy.create(enemyName); //El identificador de un instancia de un modelo deberia ser unico.
 
   let combatRegister = [];
   while (hero.HP > 0 && enemy.HP > 0) {
 
    
-    let heroInitiative = rolling.diceRoller();
+    let heroInitiative = dices.diceRoller();
 
-    let enemyInitiative = rolling.diceRoller();
+    let enemyInitiative = dices.diceRoller();
 
     if (heroInitiative > enemyInitiative) {
 
-     let res =  fight.attack(hero,enemy,heroInitiative,enemyInitiative);
+     let res =  battle.attack(hero, enemy, heroInitiative, enemyInitiative);
      combatRegister.push(res);
 
     } else {
-      let res =  fight.attack(enemy,hero,enemyInitiative,heroInitiative);
-      combatRegister.push(res);
+      let res =  battle.attack(enemy, hero, enemyInitiative, heroInitiative);
+      battleRegister.push(res);
     }
   }
 
